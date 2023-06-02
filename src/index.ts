@@ -1,17 +1,20 @@
-import { Options } from './types';
+import { Arrows, Options } from './types';
 import Counter from './counter';
+import EventEmitter from './eventEmitter';
 
 class Slider {
 	private currentIndex = 0;
-	private showDots: boolean;
-	private showArrows: boolean;
 	private autoplaySpeed: number;
 	private stopWhenHovered: boolean;
 	private counter: Counter;
-	private itemsLength: number;
 	private selector: Element;
 	private list: Element;
 	private dots: Element | null;
+	private arrows: Arrows;
+	private readonly showDots: boolean;
+	private readonly showArrows: boolean;
+	private readonly itemsLength: number;
+	private readonly eventEmitter: EventEmitter;
 
 	constructor(
 		selector: Element,
@@ -29,28 +32,33 @@ class Slider {
 		this.itemsLength = selector.children.length;
 		this.selector = selector;
 
-		this.initializeCounter();
+		this.eventEmitter = new EventEmitter();
+		this.counter = new Counter(0, this.itemsLength, this.eventEmitter);
 		this.initializeSliderPath();
 		this.initializeControls();
 		this.setActiveSlide(0);
 		this.addEventListeners();
 	}
 
-	addEventListeners = () => {
-		this.dots.addEventListener('click', this.dotsClickHandler);
+	private addEventListeners = () => {
+		this.dots?.addEventListener('click', this.dotsClickHandler);
+		this.arrows?.left.addEventListener('click', this.counter.prev);
+		this.arrows?.right.addEventListener('click', this.counter.next);
+
+		this.eventEmitter.on('changeIndex', this.setActiveSlide);
 	};
 
-	dotsClickHandler = (e: any) => {
-		const { target } = e;
+	private dotsClickHandler = (e: Event) => {
+		const target = e.target as HTMLElement;
 
 		if (!target.classList.contains('dot')) return;
 
-		const index = target.dataset.index;
+		const index = +target.dataset.index;
 
-		this.setActiveSlide(index);
+		this.counter.setIndex(index);
 	};
 
-	initializeSliderPath = () => {
+	private initializeSliderPath = () => {
 		const container = document.createElement('div');
 		container.className = 'slider-list';
 
@@ -67,20 +75,8 @@ class Slider {
 		this.selector.appendChild(container);
 	};
 
-	setActiveSlide = (index: number) => {
-		this.list.children[this.currentIndex].classList.remove('active');
-		this.dots.children[this.currentIndex].classList.remove('active');
-		this.list.children[index].classList.add('active');
-		this.dots.children[index].classList.add('active');
-		this.currentIndex = index;
-	};
-
-	initializeCounter = () => {
-		this.counter = new Counter(0, this.itemsLength);
-	};
-
-	initializeControls = (): void => {
-		if (!this.showDots || !this.showArrows) return;
+	private initializeControls = (): void => {
+		if (!this.showDots && !this.showArrows) return;
 
 		const container = document.createElement('div');
 		container.className = 'controls-container';
@@ -91,14 +87,19 @@ class Slider {
 		}
 
 		if (this.showArrows) {
-			container.prepend(this.createArrow('left'));
-			container.appendChild(this.createArrow('right'));
+			this.arrows = {
+				left: this.createArrow('left'),
+				right: this.createArrow('right'),
+			};
+
+			container.prepend(this.arrows.left);
+			container.appendChild(this.arrows.right);
 		}
 
 		this.selector.appendChild(container);
 	};
 
-	initializeDots = (): HTMLElement => {
+	private initializeDots = (): HTMLElement => {
 		const dotsContainer = document.createElement('div');
 		dotsContainer.className = 'dots-container';
 
@@ -109,7 +110,7 @@ class Slider {
 		return dotsContainer;
 	};
 
-	createDot = (index: number): HTMLElement => {
+	private createDot = (index: number): HTMLElement => {
 		const dot = document.createElement('div');
 		dot.className = 'dot';
 		dot.setAttribute('data-index', index.toString());
@@ -117,7 +118,7 @@ class Slider {
 		return dot;
 	};
 
-	createArrow = (direction: 'left' | 'right'): HTMLElement => {
+	private createArrow = (direction: 'left' | 'right'): HTMLElement => {
 		const arrow = document.createElement('button');
 		arrow.className = 'arrow-container';
 
@@ -129,17 +130,32 @@ class Slider {
 		return arrow;
 	};
 
-	next = () => {
-		console.log('next slide');
+	setActiveSlide = (index: number) => {
+		this.list.children[this.currentIndex].classList.remove('active');
+		this.dots?.children[this.currentIndex].classList.remove('active');
+		this.list.children[index].classList.add('active');
+		this.dots?.children[index].classList.add('active');
+		this.currentIndex = index;
 	};
 
-	prev = () => {
-		console.log('prev slide');
+	destroy = () => {
+		this.dots?.removeEventListener('click', this.dotsClickHandler);
+		this.arrows?.left.removeEventListener('click', this.counter.prev);
+		this.arrows?.right.removeEventListener('click', this.counter.next);
+
+		this.eventEmitter.removeListener('changeIndex', this.setActiveSlide);
 	};
 }
 
-const sliderContainer = document.querySelector('.slider');
-const slider = new Slider(sliderContainer, {
+const slider1 = new Slider(document.querySelector('.slider1'), {
 	showDots: true,
 	showArrows: true,
+});
+
+const slider2 = new Slider(document.querySelector('.slider2'), {
+	showArrows: true,
+});
+const slider3 = new Slider(document.querySelector('.slider3'), {
+	showArrows: false,
+	showDots: true,
 });
