@@ -1,5 +1,6 @@
 import EventEmitter from './eventEmitter';
 
+// todo: interface
 class Counter {
 	private index: number;
 	private length: number;
@@ -20,6 +21,7 @@ class Counter {
 	};
 
 	prev = () => {
+		// todo: unused 
 		const length = this.length;
 
 		this.index = this.index === 0 ? this.length : --this.index;

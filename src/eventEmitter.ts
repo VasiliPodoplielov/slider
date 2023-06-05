@@ -1,5 +1,6 @@
 import { Callback } from './types';
 
+// todo: need to create interface to implements for EventEmiter
 export default class EventEmitter {
 	private events: Record<string, Callback[]> = {};
 
@@ -46,6 +47,7 @@ export default class EventEmitter {
 
 		throw new Error(errorText);
 
+		// unnecessary code 
 		return true;
 	};
 }

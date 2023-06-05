@@ -2,6 +2,8 @@ import { Arrows, Options } from './types';
 import Counter from './counter';
 import EventEmitter from './eventEmitter';
 
+// todo: need interface for class it's help to avoid type in main class;
+
 class Slider {
 	private currentIndex = 0;
 	private autoplaySpeed: number;
@@ -34,13 +36,16 @@ class Slider {
 
 		this.eventEmitter = new EventEmitter();
 		this.counter = new Counter(0, this.itemsLength, this.eventEmitter);
+		// todo: better to create method for initialize all base fields.
 		this.initializeSliderPath();
 		this.initializeControls();
 		this.setActiveSlide(0);
 		this.addEventListeners();
 	}
 
+	// todo: type which return method. Need to recheck for all methods.
 	private addEventListeners = () => {
+		// todo: it's works without bind?
 		this.dots?.addEventListener('click', this.dotsClickHandler);
 		this.arrows?.left.addEventListener('click', this.counter.prev);
 		this.arrows?.right.addEventListener('click', this.counter.next);
@@ -76,6 +81,7 @@ class Slider {
 	};
 
 	private initializeControls = (): void => {
+		// todo: You violated the single responsibility split for the dots and arrows method.
 		if (!this.showDots && !this.showArrows) return;
 
 		const container = document.createElement('div');
@@ -118,6 +124,7 @@ class Slider {
 		return dot;
 	};
 
+	// todo: Enum for left ot right
 	private createArrow = (direction: 'left' | 'right'): HTMLElement => {
 		const arrow = document.createElement('button');
 		arrow.className = 'arrow-container';
@@ -146,7 +153,7 @@ class Slider {
 		this.eventEmitter.removeListener('changeIndex', this.setActiveSlide);
 	};
 }
-
+// todo: better to pass as arguments class not HTMLElement
 const slider1 = new Slider(document.querySelector('.slider1'), {
 	showDots: true,
 	showArrows: true,
