@@ -1,10 +1,9 @@
-import { Callback } from './types';
+import { IEventEmitter, Callback } from './types';
 
-// todo: need to create interface to implements for EventEmiter
-export default class EventEmitter {
-	private events: Record<string, Callback[]> = {};
+export default class EventEmitter implements IEventEmitter {
+	events: Record<string, Callback[]> = {};
 
-	on = (name: string, listener: Callback) => {
+	on = (name: string, listener: Callback): void => {
 		if (!this.events[name]) {
 			this.events[name] = [];
 		}
@@ -12,7 +11,7 @@ export default class EventEmitter {
 		this.events[name].push(listener);
 	};
 
-	removeListener = (name: string, listenerToRemove: Callback) => {
+	removeListener = (name: string, listenerToRemove: Callback): void => {
 		if (
 			this.validateEvent(
 				name,
@@ -27,7 +26,7 @@ export default class EventEmitter {
 		);
 	};
 
-	emit = (name: string, data: any) => {
+	emit = (name: string, data: any): void => {
 		if (
 			this.validateEvent(
 				name,
@@ -37,17 +36,16 @@ export default class EventEmitter {
 			return;
 		}
 
-		this.events[name].forEach((callback) => {
+		this.events[name].forEach((callback: Callback) => {
 			callback(data);
 		});
 	};
 
-	validateEvent = (name, errorText) => {
+	validateEvent = (name, errorText): boolean => {
 		if (this.events[name]) return false;
 
 		throw new Error(errorText);
 
-		// unnecessary code 
 		return true;
 	};
 }

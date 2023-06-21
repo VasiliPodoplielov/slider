@@ -39,13 +39,21 @@
   padding: 5px;
 }
 
+.left {
+  order: 1;
+}
+
 .right {
+  order: 3;
+}
+
+.right .arrow {
   transform: rotate(-45deg);
   -webkit-transform: rotate(-45deg);
   margin-right: 4px;
 }
 
-.left {
+.left .arrow {
   transform: rotate(135deg);
   -webkit-transform: rotate(135deg);
   margin-left: 4px;
@@ -56,6 +64,7 @@
   align-items: center;
   justify-content: center;
   margin: 0 20px;
+  order: 2;
 }
 
 .dot {

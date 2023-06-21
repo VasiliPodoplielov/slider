@@ -1,10 +1,10 @@
-import EventEmitter from './eventEmitter';
+import EventEmitter from '../eventEmitter/eventEmitter';
+import { ICounter } from './types';
 
-// todo: interface
-class Counter {
-	private index: number;
-	private length: number;
-	private eventEmitter: EventEmitter;
+class Counter implements ICounter {
+	index: number;
+	length: number;
+	eventEmitter: EventEmitter;
 
 	constructor(index: number, length: number, eventEmitter: EventEmitter) {
 		this.index = index;
@@ -12,24 +12,21 @@ class Counter {
 		this.eventEmitter = eventEmitter;
 	}
 
-	getIndex = () => this.index;
+	getIndex = (): number => this.index;
 
-	next = () => {
+	next = (): void => {
 		this.index = this.index === this.length ? 0 : ++this.index;
 
 		this.eventEmitter.emit('changeIndex', this.index);
 	};
 
-	prev = () => {
-		// todo: unused 
-		const length = this.length;
-
+	prev = (): void => {
 		this.index = this.index === 0 ? this.length : --this.index;
 
 		this.eventEmitter.emit('changeIndex', this.index);
 	};
 
-	setIndex = (index: number) => {
+	setIndex = (index: number): void => {
 		this.index = index;
 
 		this.eventEmitter.emit('changeIndex', this.index);
