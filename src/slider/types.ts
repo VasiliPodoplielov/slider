@@ -20,13 +20,14 @@ export enum DIRECTION {
 
 export interface ISlider {
 	currentIndex: number;
-	// autoplaySpeed: number;
-	// stopWhenHovered: boolean;
+	autoplaySpeed?: number;
+	stopWhenHovered: boolean;
 	counter: Counter;
-	selector: Element;
+	sliderContainer: Element;
 	list: Element;
 	dots: Element | null;
 	arrows: Arrows;
+	autoPlayInterval: ReturnType<typeof setInterval>;
 	readonly showDots: boolean;
 	readonly showArrows: boolean;
 	readonly itemsLength: number;
