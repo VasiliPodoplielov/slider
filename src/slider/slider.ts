@@ -10,30 +10,31 @@ class Slider implements ISlider {
 	autoplaySpeed: number;
 	stopWhenHovered: boolean;
 	counter: Counter;
-	selector: Element;
+	sliderContainer: Element;
 	list: Element;
 	dots: Element | null;
 	arrows: Arrows;
+	autoPlayInterval: ReturnType<typeof setInterval>;
 	readonly showDots: boolean;
 	readonly showArrows: boolean;
 	readonly itemsLength: number;
 	readonly eventEmitter: EventEmitter;
 
 	constructor(
-		selector: Element,
+		selector: string,
 		{
 			showArrows = true,
 			showDots = false,
 			stopWhenHovered = false,
-			autoplaySpeed = 3000,
+			autoplaySpeed,
 		}: Options
 	) {
 		this.showDots = showDots;
 		this.showArrows = showArrows;
 		this.stopWhenHovered = stopWhenHovered;
 		this.autoplaySpeed = autoplaySpeed;
-		this.itemsLength = selector.children.length;
-		this.selector = selector;
+		this.sliderContainer = document.querySelector(selector);
+		this.itemsLength = this.sliderContainer.children.length;
 
 		this.eventEmitter = new EventEmitter();
 		this.counter = new Counter(0, this.itemsLength, this.eventEmitter);
@@ -41,6 +42,7 @@ class Slider implements ISlider {
 		this.initializeSliderSelectors();
 
 		this.setActiveSlide(0);
+		this.startAutoPlay();
 		this.addEventListeners();
 	}
 
@@ -49,11 +51,24 @@ class Slider implements ISlider {
 		this.initializeControls();
 	};
 
+	private startAutoPlay = () => {
+		if (this.autoplaySpeed) {
+			this.autoPlayInterval = setInterval(
+				this.counter.next,
+				this.autoplaySpeed
+			);
+		}
+	};
+
+	private stopAutoPlay = () => {
+		clearInterval(this.autoPlayInterval);
+	};
+
 	private initializeSliderSelectors = (): void => {
-		this.dots = this.selector.querySelector('.dots-container');
+		this.dots = this.sliderContainer.querySelector('.dots-container');
 		this.arrows = {
-			left: this.selector.querySelector('.left'),
-			right: this.selector.querySelector('.right'),
+			left: this.sliderContainer.querySelector('.left'),
+			right: this.sliderContainer.querySelector('.right'),
 		};
 	};
 
@@ -61,6 +76,11 @@ class Slider implements ISlider {
 		this.dots?.addEventListener('click', this.dotsClickHandler);
 		this.arrows?.left?.addEventListener('click', this.counter.prev);
 		this.arrows?.right?.addEventListener('click', this.counter.next);
+
+		if (this.stopWhenHovered) {
+			this.list.addEventListener('mouseover', this.stopAutoPlay);
+			this.list.addEventListener('mouseout', this.startAutoPlay);
+		}
 
 		this.eventEmitter.on('changeIndex', this.setActiveSlide);
 	};
@@ -79,7 +99,7 @@ class Slider implements ISlider {
 		const container = document.createElement('div');
 		container.className = 'slider-list';
 
-		const children = this.selector.children;
+		const children = this.sliderContainer.children;
 
 		while (children.length) {
 			const child = children[0];
@@ -89,7 +109,7 @@ class Slider implements ISlider {
 		}
 
 		this.list = container;
-		this.selector.appendChild(container);
+		this.sliderContainer.appendChild(container);
 	};
 
 	private initializeControls = (): void => {
@@ -100,7 +120,7 @@ class Slider implements ISlider {
 
 		const container = getControlsContainer(arrows + dots);
 
-		this.selector.insertAdjacentHTML('beforeend', container);
+		this.sliderContainer.insertAdjacentHTML('beforeend', container);
 	};
 
 	private getDots = (): string => {
@@ -131,8 +151,14 @@ class Slider implements ISlider {
 		this.dots?.removeEventListener('click', this.dotsClickHandler);
 		this.arrows?.left.removeEventListener('click', this.counter.prev);
 		this.arrows?.right.removeEventListener('click', this.counter.next);
+		this.list.removeEventListener('mouseover', this.stopAutoPlay);
+		this.list.removeEventListener('mouseout', this.startAutoPlay);
 
 		this.eventEmitter.removeListener('changeIndex', this.setActiveSlide);
+
+		this.stopAutoPlay();
+
+		this.sliderContainer.remove();
 	};
 }
 
