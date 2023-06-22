@@ -13,11 +13,6 @@ export interface Arrows {
 	right: Element | null;
 }
 
-export enum DIRECTION {
-	LEFT = 'left',
-	RIGHT = 'right',
-}
-
 export interface ISlider {
 	currentIndex: number;
 	autoplaySpeed?: number;

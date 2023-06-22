@@ -1,9 +1,10 @@
-import { Arrows, DIRECTION, ISlider, Options } from './types';
+import { Arrows, ISlider, Options } from './types';
 import { Counter } from '../counter';
 import { EventEmitter } from '../eventEmitter';
 import { createDot, createDots } from './templates/dots';
 import { createArrow } from './templates/arrow';
 import { getControlsContainer } from './templates/controls';
+import { DIRECTION } from './enums';
 
 class Slider implements ISlider {
 	currentIndex = 0;
